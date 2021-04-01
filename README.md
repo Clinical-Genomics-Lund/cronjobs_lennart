@@ -6,6 +6,8 @@ List all cronjobs that are run by worker@lennart.
 * Why is it run?
 * What dependancies?
 
+Add script to deploy.sh. Don't change in live folder.
+
 ### Active Cron-jobs
 
 #### loqusdb for wgs
