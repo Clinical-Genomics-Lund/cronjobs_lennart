@@ -1,0 +1,20 @@
+VCF_DEST="/fs1/resources/ref/hg38/annotation_dbs/wgs/loqusdb/loqusdb_latest.vcf.gz"
+DIR="/data/bnf/dev/viktor/loqusdb/wgs_38/"
+DEST_HOST="rs-fs1"
+date=$(date '+%Y-%m-%d')
+
+
+ssh cmdscout2 \
+	"docker-compose -f /home/worker/scout_stack/docker-compose.prod.yml \
+	exec -T scout /home/app/loqusdb/bin/loqusdb -h mongodb -db loqusdb_38 index"
+ssh cmdscout2 \
+	"docker-compose -f /home/worker/scout_stack/docker-compose.prod.yml \
+	exec -T scout /home/app/loqusdb/bin/loqusdb -h mongodb -db loqusdb_38 export" > \
+	 /data/bnf/dev/viktor/loqusdb/wgs_38/wgs.loqusdb.${date}.vcf
+
+LATEST_VCF="$( ls -t $DIR/wgs.loqusdb.*.vcf | head -n1)"
+bgzip $LATEST_VCF
+tabix ${LATEST_VCF}.gz
+LATEST_VCF="${LATEST_VCF}.gz"
+scp $LATEST_VCF $DEST_HOST:$VCF_DEST
+scp ${LATEST_VCF}.tbi $DEST_HOST:${VCF_DEST}.tbi
